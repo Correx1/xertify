@@ -1124,6 +1124,21 @@ export default function UnifiedGeneratePage() {
     }
   };
 
+  const resetColorsAndBorder = () => {
+    if (activeTemplate) {
+      setBgColor(activeTemplate.styles.backgroundColor);
+      setBorderColor(activeTemplate.styles.borderColor);
+      setAccentColor(activeTemplate.styles.accentColor || activeTemplate.primaryColor);
+      setBorderStyle(activeTemplate.styles.borderStyle);
+      setBorderWidth(activeTemplate.styles.borderWidth);
+    }
+  };
+
+  const resetFontsAndSizes = () => {
+    setFontOverrides({});
+    setFontSizeOverrides({});
+  };
+
 
 
   const filteredTemplates = PREBUILT_TEMPLATES.map((template, originalIndex) => ({
@@ -1202,7 +1217,7 @@ export default function UnifiedGeneratePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[320px] overflow-y-auto pr-1">
+          <div className="flex overflow-x-auto pb-3 gap-3 max-h-[320px] scrollbar-thin sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pr-1">
             {filteredTemplates.length > 0 ? (
               filteredTemplates.map(({ template: t, originalIndex: idx }) => {
                 const isLandscape = t.layout === 'landscape';
@@ -1223,7 +1238,7 @@ export default function UnifiedGeneratePage() {
                     type="button"
                     onClick={() => handleTemplateSwitch(idx)}
                     title={t.name}
-                    className={`relative group flex flex-col items-center rounded-xl border-2 overflow-hidden transition-all duration-200 focus:outline-none ${
+                    className={`relative group flex flex-col items-center rounded-xl border-2 overflow-hidden transition-all duration-200 focus:outline-none shrink-0 w-[180px] sm:w-auto ${
                       isActive
                         ? 'border-primary shadow-md shadow-primary/20 ring-2 ring-primary/30'
                         : 'border-slate-200 hover:border-primary/50 hover:shadow-sm'
@@ -1316,7 +1331,7 @@ export default function UnifiedGeneratePage() {
             </div>
 
             {/* Signatory 1 */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-[9px] font-bold text-slate-500 uppercase">{signatureCount === 2 ? 'Signatory 1 Name' : 'Signatory Name'}</label>
                 <input type="text" id="input-issuerName" value={formValues.issuerName} onChange={(e) => handleInputChange('issuerName', e.target.value)}
@@ -1333,7 +1348,7 @@ export default function UnifiedGeneratePage() {
 
             {/* Signatory 2 (If enabled) */}
             {signatureCount === 2 && (
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold text-slate-500 uppercase">Signatory 2 Name</label>
                   <input type="text" id="input-issuerName2" value={formValues.issuerName2 || ''} onChange={(e) => handleInputChange('issuerName2', e.target.value)}
@@ -1479,7 +1494,7 @@ export default function UnifiedGeneratePage() {
             </h2>
             <p className="text-[9px] text-slate-400 -mt-1">Override the template&apos;s built-in static text (org name, title, body copy…)</p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-[9px] font-bold text-slate-400 uppercase">Header / Org Name</label>
                 <input type="text" id="input-header" value={getSemanticValue('header')} placeholder={getDefaultSemanticText('header')}
@@ -1534,7 +1549,7 @@ export default function UnifiedGeneratePage() {
 
           {/* Tab bar */}
           <div className="flex items-stretch border-b border-slate-200 bg-slate-50">
-            <div className="px-5 py-3 flex items-center gap-2 border-r border-slate-200 shrink-0">
+            <div className="px-3 sm:px-5 py-3 hidden sm:flex items-center gap-2 border-r border-slate-200 shrink-0">
               <FileDown className="w-3.5 h-3.5 text-primary" />
               <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Generate</span>
             </div>
@@ -1573,11 +1588,11 @@ export default function UnifiedGeneratePage() {
                     className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 bg-white"
                     placeholder="e.g. Sarah Jenkins" />
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <button onClick={downloadPDF} className="py-2.5 px-5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                  <button onClick={downloadPDF} className="flex-1 sm:flex-none py-2.5 px-5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
                     <FileText className="w-3.5 h-3.5 text-blue-400" /> Save PDF
                   </button>
-                  <button onClick={downloadPNG} className="py-2.5 px-5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                  <button onClick={downloadPNG} className="flex-1 sm:flex-none py-2.5 px-5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
                     <Download className="w-3.5 h-3.5" /> Save PNG
                   </button>
                 </div>
@@ -1739,11 +1754,11 @@ export default function UnifiedGeneratePage() {
                     </div>
 
                     {/* Bulk generation control row */}
-                    <div className="flex gap-2 justify-end pt-2">
-                      <button onClick={() => generateBulkZip('pdf')} className="py-2 px-4 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                    <div className="flex flex-col sm:flex-row gap-2 justify-end pt-2">
+                      <button onClick={() => generateBulkZip('pdf')} className="w-full sm:w-auto py-2 px-4 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
                         <FileText className="w-3.5 h-3.5 text-blue-400" /> Export All (PDF ZIP)
                       </button>
-                      <button onClick={() => generateBulkZip('png')} className="py-2 px-4 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                      <button onClick={() => generateBulkZip('png')} className="w-full sm:w-auto py-2 px-4 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
                         <Download className="w-3.5 h-3.5" /> Export All (PNG ZIP)
                       </button>
                     </div>
@@ -1755,7 +1770,7 @@ export default function UnifiedGeneratePage() {
 
           {/* ── LIVE PREVIEW CANVAS ─────────────────── */}
           <div ref={previewContainerRef} className="bg-slate-100 flex items-center justify-center py-8 min-h-[440px] relative overflow-hidden">
-            <div className="absolute top-3 left-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest select-none z-10">
+            <div className="absolute top-3 left-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest select-none z-10 hidden sm:block">
               Live Preview · {customizedTemplate.layout === 'landscape' ? '1120×800 Landscape' : '800×1120 Portrait'}
             </div>
             <button
@@ -1944,9 +1959,18 @@ export default function UnifiedGeneratePage() {
           
           {/* Design Colors & Border */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-            <h2 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-primary" /> 1. Colors &amp; Border
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-primary" /> 1. Colors &amp; Border
+              </h2>
+              <button
+                type="button"
+                onClick={resetColorsAndBorder}
+                className="text-[9px] font-bold text-primary hover:underline cursor-pointer"
+              >
+                Use Default Settings
+              </button>
+            </div>
             <div className="grid grid-cols-3 gap-3">
               {([
                 { label: 'Background', val: bgColor, set: setBgColor },
@@ -1963,7 +1987,7 @@ export default function UnifiedGeneratePage() {
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
               <div className="space-y-1.5">
                 <label className="text-[9px] font-bold text-slate-500 uppercase">Border Style</label>
                 <select value={borderStyle} onChange={(e) => setBorderStyle(e.target.value as 'solid' | 'double' | 'fancy' | 'none')}
@@ -2035,9 +2059,18 @@ export default function UnifiedGeneratePage() {
 
           {/* Fonts & Sizes Overrides */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 font-sans">
-            <h2 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-primary" /> 3. Customize Fonts &amp; Sizes
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-primary" /> 3. Customize Fonts &amp; Sizes
+              </h2>
+              <button
+                type="button"
+                onClick={resetFontsAndSizes}
+                className="text-[9px] font-bold text-primary hover:underline cursor-pointer"
+              >
+                Use Default Settings
+              </button>
+            </div>
             <p className="text-[9px] text-slate-400 -mt-1">Choose different calligraphic or clean fonts and adjust sizes for different parts of the certificate.</p>
             
             <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
@@ -2064,7 +2097,7 @@ export default function UnifiedGeneratePage() {
                       <span className="text-[9px] font-mono text-slate-400">{currentSize}px</span>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {/* Font Family selector */}
                       <div className="space-y-1 text-left w-full">
                         <label className="text-[9px] font-bold text-slate-400 uppercase">Font Family</label>
