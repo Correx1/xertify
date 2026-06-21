@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Xertify - Bulk Certificate Generator & Designer",
+  title: "Xertified - Bulk Certificate Generator & Designer",
   description: "Design custom certificate templates, map spreadsheet variables, and bulk-issue credentials as PDFs or high-resolution PNGs.",
 };
 

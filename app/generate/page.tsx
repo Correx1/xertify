@@ -165,7 +165,7 @@ export default function UnifiedGeneratePage() {
   // Load settings on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('certifypro_settings');
+      const saved = localStorage.getItem('Xertified_settings');
       if (saved) {
         const data = JSON.parse(saved);
         hasRestored.current = true;
@@ -235,7 +235,7 @@ export default function UnifiedGeneratePage() {
         fontSizeOverrides,
         activeTemplateIndex,
       };
-      localStorage.setItem('certifypro_settings', JSON.stringify(settings));
+      localStorage.setItem('Xertified_settings', JSON.stringify(settings));
     } catch (e) {
       console.error('Error saving settings', e);
     }
@@ -1082,7 +1082,7 @@ export default function UnifiedGeneratePage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'certifypro_sample_recipients.csv');
+    link.setAttribute('download', 'Xertified_sample_recipients.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1172,7 +1172,7 @@ export default function UnifiedGeneratePage() {
             <div className="p-1.5 rounded-xl bg-primary text-white shadow-sm shadow-primary/30 group-hover:scale-105 transition-transform">
               <Award className="w-4 h-4" />
             </div>
-            <span className="font-bold text-lg tracking-tight text-slate-900">CertifyPro</span>
+            <span className="font-bold text-lg tracking-tight text-slate-900">Xertified</span>
           </Link>
           <Link href="/" className="text-slate-500 hover:text-primary text-sm font-semibold flex items-center gap-1.5 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back
@@ -2199,7 +2199,7 @@ export default function UnifiedGeneratePage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-400 bg-white print:hidden mt-2">
-        <p>&copy; {new Date().getFullYear()} CertifyPro. Secure browser-sandbox rendering.</p>
+        <p>&copy; {new Date().getFullYear()} Xertified. Secure browser-sandbox rendering.</p>
       </footer>
 
     </div>

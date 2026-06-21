@@ -24,7 +24,7 @@ export default function LandingPage() {
               <Award className="w-5 h-5" />
             </div>
             <span className="font-bold text-xl tracking-tight text-white">
-              CertifyPro
+              Xertified
             </span>
           </Link>
         </div>
@@ -82,7 +82,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
             <h2 className="text-xs font-bold text-primary uppercase tracking-widest">Simplifying Generation</h2>
-            <p className="text-3xl font-bold tracking-tight text-slate-900">How CertifyPro Works</p>
+            <p className="text-3xl font-bold tracking-tight text-slate-900">How Xertified Works</p>
             <p className="text-slate-500 text-sm">Create high-quality credentials in three simple steps, without write-ups or payment forms.</p>
           </div>
 
@@ -148,7 +148,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 py-8 text-center text-xs text-slate-400 bg-slate-50">
-        <p>&copy; {new Date().getFullYear()} CertifyPro. Built for modern credentials automation.</p>
+        <p>&copy; {new Date().getFullYear()} Xertified. Developed by <a href="https://chukwuraphael.vercel.app/" className='underline text-blue-600'> Chukwu Raphael</a></p>
       </footer>
       
     </div>

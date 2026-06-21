@@ -550,7 +550,7 @@ export const CertificateRenderer: React.FC<CertificateRendererProps> = ({
       {watermark && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
           <div className="text-zinc-500/10 dark:text-white/5 text-4xl sm:text-5xl font-black tracking-widest uppercase transform -rotate-45 font-sans border-4 border-dashed border-zinc-500/10 dark:border-white/5 px-6 py-3 rounded-xl scale-125">
-            CertifyPro Preview
+            Xertified Preview
           </div>
         </div>
       )}

@@ -151,7 +151,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Sparkles className="w-3.5 h-3.5" />
             Empowering Verification & Credentials
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">Xertify Certificate Builder</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">Xertified Certificate Builder</h1>
           <p className="text-lg text-slate-100 leading-relaxed">
             Design professional custom certificate templates, add secure fields, upload authorized signatures, and bulk generate high-resolution credentials from spreadsheet imports.
           </p>
