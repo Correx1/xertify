@@ -8,149 +8,204 @@ import {
   FileSpreadsheet, 
   FileDown, 
   ArrowRight,
-  MonitorPlay
+  MonitorPlay,
+  ShieldCheck,
+  Zap,
+  Palette,
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-[#060b19] text-slate-100 font-sans antialiased selection:bg-blue-600 selection:text-white">
       
-      {/* Dark Gradient Hero Section */}
-      <section className="relative pt-32 pb-28 bg-[#0b081e] overflow-hidden border-b border-slate-950">
-        {/* Logo at the top left */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 absolute top-8 left-0 right-0 z-20">
-          <Link href="/" className="flex items-center gap-2.5 group w-fit">
-            <div className="p-2 rounded-xl bg-primary text-white shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
+      {/* Header Bar */}
+      <header className="sticky top-0 z-50 bg-[#060b19]/90 backdrop-blur-md border-b border-slate-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="p-2 rounded-lg bg-blue-600 text-white shadow-sm group-hover:bg-blue-500 transition-colors">
               <Award className="w-5 h-5" />
             </div>
-            <span className="font-bold text-xl tracking-tight text-white">
+            <span className="font-bold text-lg tracking-tight text-white">
               Xertified
             </span>
           </Link>
+
+          <nav className="flex items-center gap-4 sm:gap-6">
+            <Link 
+              href="/generate" 
+              className="text-sm font-medium text-slate-300 hover:text-white transition-colors hidden sm:block"
+            >
+              Templates
+            </Link>
+            <Link 
+              href="/generate" 
+              className="px-4.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm shadow-sm transition-all flex items-center gap-2 group"
+            >
+              Open Workspace
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </nav>
         </div>
-        {/* Radial glows matching reference image */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-purple-650/15 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[120px] bg-primary/10 blur-[80px] rounded-full pointer-events-none" />
+      </header>
+
+      {/* Hero Section with Full-Width End-to-End Background */}
+      <section className="relative w-full overflow-hidden border-b border-slate-800/80 bg-[#060b19]">
         
-        {/* Subtle grid mockup using CSS background pattern */}
-        <div 
-          className="absolute inset-0 opacity-[0.05] pointer-events-none"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, #ffffff 1px, transparent 1px),
-              linear-gradient(to bottom, #ffffff 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px',
-            maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)'
-          }}
-        />
+        {/* Full-Width Soft Ambient Glow Highlights */}
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-l from-blue-600/20 via-indigo-600/10 to-transparent blur-3xl pointer-events-none z-0" />
+        <div className="absolute top-10 left-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none z-0" />
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 relative z-10">
-          
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white">
-            Create Beautiful Certificates <br/>
-            <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">in Minutes</span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-slate-400 leading-relaxed max-w-2xl mx-auto">
-            Bulk generate high-resolution certificates from Excel or CSV files, customize designer templates, and export instantly in print-perfect PDF or PNG format.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Link 
-              href="/generate" 
-              className="px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 group w-full sm:w-auto"
-            >
-              Browse Templates
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link 
-              href="/generate" 
-              className="px-8 py-3.5 border border-slate-800 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
-            >
-              <FileSpreadsheet className="w-4.5 h-4.5 text-blue-400" />
-              Bulk Generate CSV
-            </Link>
-          </div>
-
-        </div>
-      </section>
-
-      {/* How it Works Section */}
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
-            <h2 className="text-xs font-bold text-primary uppercase tracking-widest">Simplifying Generation</h2>
-            <p className="text-3xl font-bold tracking-tight text-slate-900">How Xertified Works</p>
-            <p className="text-slate-500 text-sm">Create high-quality credentials in three simple steps, without write-ups or payment forms.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Content Container */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pt-32 lg:pb-32 relative z-10">
+          <div className="max-w-3xl text-left space-y-6">
             
-            {/* Step 1 */}
-            <div className="bg-white border border-slate-200 p-8 rounded-xl space-y-4 shadow-sm hover:shadow-md transition-shadow relative">
-              <div className="absolute top-6 right-6 font-mono text-5xl font-extrabold text-slate-100 select-none">01</div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 text-primary flex items-center justify-center">
-                <MonitorPlay className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Choose a Template</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Select from our designer prebuilt layouts matching corporate, academic, and award themes, or create a layout from scratch.
-              </p>
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08]">
+              Generate & Issue <br />
+              <span className="text-blue-400 font-extrabold">1,000+ Certificates in Minutes.</span>
+            </h1>
+
+            <p className="text-base sm:text-xl text-slate-300 max-w-2xl leading-relaxed">
+              Upload CSV spreadsheets, choose designer templates, map recipient names visually, and export print-ready vector PDFs or PNG archives.
+            </p>
+
+            <div className="pt-2">
+              <Link 
+                href="/generate" 
+                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base shadow-lg shadow-blue-600/25 transition-all group"
+              >
+                Launch Studio Workspace
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
 
-            {/* Step 2 */}
-            <div className="bg-white border border-slate-200 p-8 rounded-xl space-y-4 shadow-sm hover:shadow-md transition-shadow relative">
-              <div className="absolute top-6 right-6 font-mono text-5xl font-extrabold text-slate-100 select-none">02</div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 text-primary flex items-center justify-center">
-                <UploadCloud className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Import Recipient Data</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Upload your CSV file, or input manually. Use our visual field mapper to bind variables directly with columns in your spreadsheet.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="bg-white border border-slate-200 p-8 rounded-xl space-y-4 shadow-sm hover:shadow-md transition-shadow relative">
-              <div className="absolute top-6 right-6 font-mono text-5xl font-extrabold text-slate-100 select-none">03</div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 text-primary flex items-center justify-center">
-                <FileDown className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Download & Share</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Generate high-resolution vector PDFs or PNGs. Choose to download individual records or bulk compile everything into a zip.
-              </p>
+            <div className="pt-2 text-xs font-mono text-slate-400 flex items-center gap-2 select-none">
+              <span className="font-semibold text-slate-300">.pdf vector export</span>
+              <span>·</span>
+              <span className="font-semibold text-slate-300">.csv bulk mapping</span>
+              <span>·</span>
+              <span className="font-semibold text-slate-300">100% in-browser</span>
             </div>
 
           </div>
         </div>
       </section>
 
-      {/* Footer Call-to-action */}
-      <section className="py-20 border-t border-slate-200 bg-white">
-        <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
-          <h3 className="text-3xl font-extrabold tracking-tight text-slate-900">Ready to bulk issue certificates?</h3>
-          <p className="text-slate-500 text-sm max-w-xl mx-auto">
-            Get started by picking one of our prebuilt layouts or start formatting your CSV. No signups required.
-          </p>
-          <div className="flex justify-center">
+      {/* Features Section */}
+      <section className="py-24 border-t border-slate-800/80 relative overflow-hidden bg-[#060b19]">
+        {/* Subtle grid background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
+          
+          {/* Section Main Headline */}
+          <div className="max-w-4xl space-y-3">
+            <div className="text-xs font-mono uppercase tracking-widest text-slate-400 font-semibold">
+              CORE FOUNDATION
+            </div>
+            <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-none">
+              Everything you need to issue credentials.
+            </h2>
+            <p className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-500 leading-none">
+              Standard on every single certificate plan.
+            </p>
+          </div>
+
+          {/* 2 Columns: 3 items on left, 3 items on right */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
+            
+            {/* Left Column (3 Features) */}
+            <div className="space-y-8">
+              
+              {/* Feature 1 */}
+              <div className="border-l-2 border-blue-500 pl-6 space-y-2">
+                <h3 className="text-lg font-bold text-white">
+                  Designer Templates
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Academic, corporate, award, minimalist, and tech layouts preconfigured with professional font combinations.
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="border-l-2 border-slate-800 hover:border-blue-500 pl-6 space-y-2 transition-colors">
+                <h3 className="text-lg font-bold text-white">
+                  Spreadsheet Auto-Mapping
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Upload CSV files and map columns like Recipient Name, Course Title, Issue Date, and Signatures instantly.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="border-l-2 border-slate-800 hover:border-blue-500 pl-6 space-y-2 transition-colors">
+                <h3 className="text-lg font-bold text-white">
+                  Scannable Verification QR
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Embed custom scannable QR code elements onto credentials to enable online validation and certificate lookups.
+                </p>
+              </div>
+
+            </div>
+
+            {/* Right Column (3 Features) */}
+            <div className="space-y-8">
+              
+              {/* Feature 4 */}
+              <div className="border-l-2 border-slate-800 hover:border-blue-500 pl-6 space-y-2 transition-colors">
+                <h3 className="text-lg font-bold text-white">
+                  Logos & Signatures Upload
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Upload institution logos, seal badges, and authorized signatures with optional background removal.
+                </p>
+              </div>
+
+              {/* Feature 5 */}
+              <div className="border-l-2 border-slate-800 hover:border-blue-500 pl-6 space-y-2 transition-colors">
+                <h3 className="text-lg font-bold text-white">
+                  Bulk ZIP Export
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Export hundreds of certificates packaged neatly in a single `.zip` file formatted as high-res PNG or PDF.
+                </p>
+              </div>
+
+              {/* Feature 6 */}
+              <div className="border-l-2 border-slate-800 hover:border-blue-500 pl-6 space-y-2 transition-colors">
+                <h3 className="text-lg font-bold text-white">
+                  High-DPI Print Support
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Optimized vector layouts built to print cleanly with crisp text and vector borders at any scale.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* CTA Action Button */}
+          <div className="pt-8 flex justify-center">
             <Link 
               href="/generate"
-              className="px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg shadow-lg shadow-primary/20 active:scale-95 transition-all"
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/20 transition-all group"
             >
-              Open Generation Workspace
+              Open Workspace
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
+
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 py-8 text-center text-xs text-slate-400 bg-slate-50">
-        <p>&copy; {new Date().getFullYear()} Xertified. Developed by <a href="https://chukwuraphael.vercel.app/" className='underline text-blue-600'> Chukwu Raphael</a></p>
+      <footer className="border-t border-slate-800/80 py-10 text-center text-xs text-slate-500 bg-[#040711]">
+        <p>&copy; {new Date().getFullYear()} Xertified. Developed by <a href="https://chukwuraphael.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline font-medium">Chukwu Raphael</a></p>
       </footer>
-      
+
     </div>
   );
 }

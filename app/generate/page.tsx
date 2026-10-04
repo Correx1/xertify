@@ -25,7 +25,13 @@ import {
   Sliders,
   CheckSquare,
   Square,
-  X
+  X,
+  Mail,
+  Send,
+  AlertCircle,
+  CheckCircle,
+  RefreshCw,
+  Server
 } from 'lucide-react';
 
 const SCRIPT_FONTS = ['Great Vibes', 'Alex Brush', 'Pinyon Script', 'Italianno', 'Playball', 'Parisienne', 'Tangerine', 'Sacramento', 'Allura'];
@@ -40,6 +46,7 @@ export default function UnifiedGeneratePage() {
   // Shared Form Values (Preserved across template switches)
   const [formValues, setFormValues] = useState<Record<string, string>>({
     recipientName: 'Sarah Jenkins',
+    recipientEmail: 'sarah.jenkins@example.com',
     courseName: 'Advanced Web Applications Development',
     date: 'June 9, 2026',
     issuerName: 'Dr. Michael Chen',
@@ -47,6 +54,32 @@ export default function UnifiedGeneratePage() {
     issuerName2: 'Dr. Jane Smith',
     issuerTitle2: 'Dean of Academics',
   });
+
+  // Resend Email Engine Feature States
+  const [showEmailModal, setShowEmailModal] = useState<boolean>(false);
+  const [resendApiKey, setResendApiKey] = useState<string>('');
+  const [resendSenderEmail, setResendSenderEmail] = useState<string>('');
+  const [emailSubject, setEmailSubject] = useState<string>('Your Certificate of Completion - {{courseName}}');
+  const [emailBody, setEmailBody] = useState<string>(
+    'Hello {{recipientName}},\n\n' +
+    'Congratulations on completing {{courseName}}!\n\n' +
+    'Your official PDF certificate of completion is attached to this email.\n\n' +
+    'Issued Date: {{date}}\n' +
+    'Issued By: {{issuerName}}\n\n' +
+    'Best regards,\n' +
+    '{{issuerName}}\n' +
+    'Xertified Credentials Platform'
+  );
+  const [emailIsSending, setEmailIsSending] = useState<boolean>(false);
+  const [emailProgress, setEmailProgress] = useState<{
+    current: number;
+    total: number;
+    currentEmail?: string;
+    logs: { id: number; recipientName: string; email: string; status: 'sending' | 'sent' | 'failed'; message: string; timestamp: string }[];
+  } | null>(null);
+  const [emailSuccess, setEmailSuccess] = useState<boolean>(false);
+  const [emailValidationError, setEmailValidationError] = useState<string>('');
+  const [showModalPreview, setShowModalPreview] = useState<boolean>(false);
 
   // Custom texts for semantic areas, preserved across template switches
   const [customTexts, setCustomTexts] = useState<Record<string, string>>({
@@ -974,6 +1007,132 @@ export default function UnifiedGeneratePage() {
     }
   };
 
+  // High-Speed Email Dispatch Engine (PDF Attachment)
+  const handleBulkEmailDispatch = async () => {
+    setEmailValidationError('');
+
+    // 1. Validate Sending From (Sender Email)
+    if (!resendSenderEmail || !resendSenderEmail.trim()) {
+      setEmailValidationError('Please enter a Sender Email Address (Sending From).');
+      return;
+    }
+
+    // 2. Validate Recipient Email (To) if in Single mode
+    if (csvData.length === 0) {
+      const singleEmail = formValues['recipientEmail']?.trim();
+      if (!singleEmail) {
+        setEmailValidationError('Please enter a Recipient Email address.');
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(singleEmail)) {
+        setEmailValidationError('Please enter a valid Recipient Email address (e.g. user@example.com).');
+        return;
+      }
+    }
+
+    // 3. Validate Email Subject Line
+    if (!emailSubject || !emailSubject.trim()) {
+      setEmailValidationError('Please enter an Email Subject Line.');
+      return;
+    }
+
+    // 4. Validate Email Body Message
+    if (!emailBody || !emailBody.trim()) {
+      setEmailValidationError('Please enter an Email Body Message.');
+      return;
+    }
+
+    const targetRows = csvData.length > 0 ? csvData.map((row) => {
+      const obj: Record<string, string> = { ...formValues };
+      Object.entries(mappings).forEach(([key, colIdx]) => {
+        if (row[colIdx] !== undefined) {
+          obj[key] = row[colIdx];
+        }
+      });
+      return obj;
+    }) : [formValues];
+
+    setEmailIsSending(true);
+    setEmailSuccess(false);
+    
+    const fontUrl = getDynamicFontsStylesheetUrl();
+    const batchSize = 3;
+
+    try {
+      for (let i = 0; i < targetRows.length; i += batchSize) {
+        const currentBatch = targetRows.slice(i, i + batchSize);
+        setBulkRenderRows(currentBatch);
+        
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        for (let j = 0; j < currentBatch.length; j++) {
+          const rowVal = currentBatch[j];
+          const recName = rowVal['recipientName'] || `Recipient ${i + j + 1}`;
+          const recEmail = rowVal['recipientEmail'] || rowVal['email'] || formValues['recipientEmail'] || `${recName.toLowerCase().replace(/[\s_:-]+/g, '.')}@example.com`;
+          
+          // Grab SVG element from offscreen renderer or preview element
+          const container = document.getElementById(`bulk-cert-container-${j}`);
+          const svgEl = (container?.querySelector('svg') || previewSvgRef.current) as SVGSVGElement | null;
+
+          let pdfBase64 = '';
+          if (svgEl) {
+            try {
+              const pdfBlob = await svgToPdfBlob(svgEl, customizedTemplate.layout, fontUrl);
+              const arrayBuffer = await pdfBlob.arrayBuffer();
+              const uint8 = new Uint8Array(arrayBuffer);
+              let binary = '';
+              for (let b = 0; b < uint8.byteLength; b++) {
+                binary += String.fromCharCode(uint8[b]);
+              }
+              pdfBase64 = btoa(binary);
+            } catch (err) {
+              console.error('PDF rendering failed', err);
+            }
+          }
+
+          const filename = `${recName.toLowerCase().replace(/[\s_:-]+/g, '_')}_certificate.pdf`;
+
+          const interpolatedSubject = emailSubject
+            .replace(/\{\{recipientName\}\}/g, recName)
+            .replace(/\{\{courseName\}\}/g, rowVal['courseName'] || '')
+            .replace(/\{\{date\}\}/g, rowVal['date'] || '');
+
+          const interpolatedBody = emailBody
+            .replace(/\{\{recipientName\}\}/g, recName)
+            .replace(/\{\{courseName\}\}/g, rowVal['courseName'] || '')
+            .replace(/\{\{date\}\}/g, rowVal['date'] || '')
+            .replace(/\{\{issuerName\}\}/g, rowVal['issuerName'] || '');
+
+          const response = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: resendSenderEmail,
+              to: recEmail,
+              subject: interpolatedSubject,
+              bodyText: interpolatedBody,
+              pdfBase64,
+              filename
+            })
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Unable to dispatch email. Please try again.');
+          }
+        }
+      }
+
+      setEmailSuccess(true);
+    } catch (err) {
+      setEmailValidationError((err as Error).message);
+    } finally {
+      setBulkRenderRows([]);
+      setEmailIsSending(false);
+    }
+  };
+
   // Drag and Drop Upload Processor
   const processCSVFile = (file: File) => {
     setFileName(file.name);
@@ -990,11 +1149,14 @@ export default function UnifiedGeneratePage() {
 
           // Smart auto-mapping with fuzzy matching
           const autoMap: Record<string, number> = {};
-          const standardKeys = ['recipientName', 'courseName', 'date', 'issuerName', 'issuerTitle', 'issuerName2', 'issuerTitle2'];
+          const standardKeys = ['recipientName', 'recipientEmail', 'courseName', 'date', 'issuerName', 'issuerTitle', 'issuerName2', 'issuerTitle2'];
           standardKeys.forEach(key => {
             const cleanKey = key.toLowerCase();
             const matchIdx = headers.findIndex(h => {
               const cleanH = h.toLowerCase().replace(/[\s_:-]+/g, '');
+              if (cleanKey === 'recipientemail' || cleanKey === 'email') {
+                return cleanH.includes('email') || cleanH.includes('mail') || cleanH.includes('e-mail');
+              }
               if (cleanKey === 'recipientname') {
                 return cleanH.includes('recipient') || cleanH.includes('name') || cleanH.includes('student') || cleanH.includes('fullname');
               }
@@ -1072,10 +1234,11 @@ export default function UnifiedGeneratePage() {
 
   const downloadSampleCSV = () => {
     const csvContent = [
-      ['Recipient Name', 'Course Name', 'Date', 'Signatory Name', 'Signatory Title'],
-      ['Sarah Jenkins', 'Advanced Web Applications Development', 'June 9, 2026', 'Dr. Michael Chen', 'Director of Education'],
-      ['David Miller', 'Cloud Architecture Masterclass', 'June 10, 2026', 'Dr. Michael Chen', 'Director of Education'],
-      ['Emily Sophia', 'Interactive Design Principles', 'June 11, 2026', 'Dr. Michael Chen', 'Director of Education'],
+      ['Recipient Name', 'Recipient Email', 'Course Name', 'Issue Date', 'Signatory Name', 'Signatory Title'],
+      ['Sarah Jenkins', 'sarah.jenkins@example.com', 'Advanced Web Applications Development', 'June 9, 2026', 'Dr. Michael Chen', 'Director of Education'],
+      ['David Miller', 'david.miller@example.com', 'Cloud Architecture Masterclass', 'June 10, 2026', 'Dr. Michael Chen', 'Director of Education'],
+      ['Emily Sophia', 'emily.sophia@example.com', 'Interactive Design Principles', 'June 11, 2026', 'Dr. Michael Chen', 'Director of Education'],
+      ['Marcus Vance', 'marcus.vance@example.com', 'Cybersecurity Strategy', 'June 12, 2026', 'Dr. Michael Chen', 'Director of Education'],
     ].map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1185,10 +1348,17 @@ export default function UnifiedGeneratePage() {
 
         {/* Top Control Banner */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-          <h1 className="text-xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-            <Award className="w-5 h-5 text-primary" /> Certificate Generator
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">Pick a template, upload recipient details, and customize your layout.</p>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                <Award className="w-5 h-5 text-primary" />
+              </div>
+              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                Certificate Studio &amp; Dispatch Engine
+              </h1>
+            </div>
+            <p className="text-xs text-slate-500">Pick a template, import bulk recipient data via CSV, customize layout &amp; dispatch directly to inboxes.</p>
+          </div>
         </div>
 
         {/* 1. Select Layout (Full Width) */}
@@ -1588,13 +1758,11 @@ export default function UnifiedGeneratePage() {
                     className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 bg-white"
                     placeholder="e.g. Sarah Jenkins" />
                 </div>
-                <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                  <button onClick={downloadPDF} className="flex-1 sm:flex-none py-2.5 px-5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
-                    <FileText className="w-3.5 h-3.5 text-blue-400" /> Save PDF
-                  </button>
-                  <button onClick={downloadPNG} className="flex-1 sm:flex-none py-2.5 px-5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
-                    <Download className="w-3.5 h-3.5" /> Save PNG
-                  </button>
+                <div className="space-y-1 flex-1 min-w-[200px]">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase">Recipient Email Address</label>
+                  <input type="email" id="input-recipientEmail" value={formValues.recipientEmail || ''} onChange={(e) => handleInputChange('recipientEmail', e.target.value)}
+                    className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 bg-white"
+                    placeholder="e.g. sarah.jenkins@example.com" />
                 </div>
               </div>
             )}
@@ -1636,15 +1804,25 @@ export default function UnifiedGeneratePage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center text-[10px]">
-                      <span className="text-slate-400">Sample import templates:</span>
-                      <button
-                        type="button"
-                        onClick={downloadSampleCSV}
-                        className="text-primary font-bold hover:underline flex items-center gap-1"
-                      >
-                        <FileDown className="w-3.5 h-3.5" /> Download Sample CSV
-                      </button>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-slate-700">Need a CSV template to get started?</span>
+                        <button
+                          type="button"
+                          onClick={downloadSampleCSV}
+                          className="px-2.5 py-1 bg-primary text-white font-bold rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
+                        >
+                          <FileDown className="w-3 h-3" /> Download Sample CSV
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-1 text-[8px] font-mono text-slate-500">
+                        <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-700 font-semibold">Recipient Name</span>
+                        <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-emerald-700 font-semibold">Recipient Email</span>
+                        <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-700 font-semibold">Course Name</span>
+                        <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-700 font-semibold">Issue Date</span>
+                        <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-700 font-semibold">Signatory Name</span>
+                        <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-700 font-semibold">Signatory Title</span>
+                      </div>
                     </div>
                   </div>
 
@@ -1753,13 +1931,21 @@ export default function UnifiedGeneratePage() {
                       </table>
                     </div>
 
-                    {/* Bulk generation control row */}
-                    <div className="flex flex-col sm:flex-row gap-2 justify-end pt-2">
-                      <button onClick={() => generateBulkZip('pdf')} className="w-full sm:w-auto py-2 px-4 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
-                        <FileText className="w-3.5 h-3.5 text-blue-400" /> Export All (PDF ZIP)
+                    {/* Bulk ZIP export buttons inside CSV panel */}
+                    <div className="flex flex-col sm:flex-row gap-2 justify-end pt-3 border-t border-slate-100">
+                      <button 
+                        type="button"
+                        onClick={() => generateBulkZip('pdf')} 
+                        className="w-full sm:w-auto py-2.5 px-4 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-blue-400" /> Export All ({csvData.length} PDF ZIP)
                       </button>
-                      <button onClick={() => generateBulkZip('png')} className="w-full sm:w-auto py-2 px-4 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
-                        <Download className="w-3.5 h-3.5" /> Export All (PNG ZIP)
+                      <button 
+                        type="button"
+                        onClick={() => generateBulkZip('png')} 
+                        className="w-full sm:w-auto py-2.5 px-4 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" /> Export All ({csvData.length} PNG ZIP)
                       </button>
                     </div>
                   </div>
@@ -1769,26 +1955,49 @@ export default function UnifiedGeneratePage() {
           </div>
 
           {/* ── LIVE PREVIEW CANVAS ─────────────────── */}
-          <div ref={previewContainerRef} className="bg-slate-100 flex items-center justify-center py-8 min-h-[440px] relative overflow-hidden">
-            <div className="absolute top-3 left-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest select-none z-10 hidden sm:block">
-              Live Preview · {customizedTemplate.layout === 'landscape' ? '1120×800 Landscape' : '800×1120 Portrait'}
+          <div ref={previewContainerRef} className="bg-slate-100/80 border border-slate-200 rounded-2xl flex flex-col items-center justify-between min-h-[480px] relative overflow-hidden shadow-sm">
+            
+            {/* Top Toolbar Overlay on Certificate Canvas */}
+            <div className="w-full px-5 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-slate-200/80 bg-white z-20">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Live Preview · {customizedTemplate.layout === 'landscape' ? '1120×800 Landscape' : '800×1120 Portrait'}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEmailModal(true)}
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>Email Certificates ({csvData.length > 0 ? `${csvData.length} Recipients` : 'Single'})</span>
+                </button>
+
+
+
+                <button
+                  type="button"
+                  onClick={() => setShowStudio(true)}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 border border-slate-200/80 cursor-pointer"
+                >
+                  <Sliders className="w-3.5 h-3.5 text-primary" />
+                  <span>Customize</span>
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowStudio(true)}
-              className="absolute top-3 right-4 py-1.5 px-3 bg-slate-900 hover:bg-black text-white text-[10px] font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] border border-slate-800 z-20"
-            >
-              <Sliders className="w-3.5 h-3.5 text-primary animate-pulse" />
-              <span>Customize Design</span>
-            </button>
-            <CertificateRenderer
-              svgRef={previewSvgRef}
-              template={customizedTemplate}
-              values={activeValues}
-              scale={scale}
-              onElementClick={handleElementClick}
-              className="rounded-xl shadow-xl border border-slate-200"
-            />
+
+            <div className="flex-1 flex items-center justify-center py-6 w-full relative">
+              <CertificateRenderer
+                svgRef={previewSvgRef}
+                template={customizedTemplate}
+                values={activeValues}
+                scale={scale}
+                onElementClick={handleElementClick}
+                className="rounded-xl shadow-xl border border-slate-200"
+              />
+            </div>
             
             {/* Floating Zoom Controls */}
             <div className="absolute bottom-4 right-4 flex items-center gap-1.5 bg-white/95 border border-slate-200 rounded-xl p-1.5 shadow-lg z-20 select-none text-xs font-semibold">
@@ -2195,6 +2404,192 @@ export default function UnifiedGeneratePage() {
           className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[140] transition-opacity duration-300 print:hidden"
           onClick={() => setShowStudio(false)}
         />
+      )}
+
+      {/* ── EMAIL CERTIFICATES DISPATCH MODAL OVERLAY ─────────────────── */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[9999] animate-in fade-in duration-200 p-4 print:hidden">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-xl w-full flex flex-col max-h-[90vh] overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                  <Mail className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    Email Certificates
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Dispatch vector PDF certificates directly to recipient inboxes
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => { setShowEmailModal(false); setEmailSuccess(false); setEmailValidationError(''); }}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-1 text-slate-800">
+              
+              {/* Validation Error Alert */}
+              {emailValidationError && (
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{emailValidationError}</span>
+                </div>
+              )}
+
+              {/* Success Notification */}
+              {emailSuccess && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Certificate email(s) dispatched successfully!</span>
+                </div>
+              )}
+
+              {/* Dynamic Sending From Email */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Sending From (Sender Name &amp; Email)</label>
+                <input 
+                  type="text"
+                  placeholder="e.g. Acme Academy <info@acmeacademy.org>"
+                  value={resendSenderEmail}
+                  onChange={(e) => { setResendSenderEmail(e.target.value); setEmailValidationError(''); }}
+                  className="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary font-medium"
+                />
+              </div>
+
+              {/* Recipient Email (To) Field */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Recipient Email (To)</label>
+                {csvData.length > 0 ? (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs">
+                    <span className="font-semibold text-emerald-900 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-emerald-600" />
+                      Auto-mapped from CSV &quot;Recipient Email&quot; column
+                    </span>
+                    <span className="font-mono font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full text-[10px]">
+                      {csvData.length} Bulk Recipients
+                    </span>
+                  </div>
+                ) : (
+                  <input 
+                    type="email"
+                    placeholder="recipient@example.com"
+                    value={formValues.recipientEmail || ''}
+                    onChange={(e) => { handleInputChange('recipientEmail', e.target.value); setEmailValidationError(''); }}
+                    className="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary font-medium"
+                  />
+                )}
+              </div>
+
+              {/* Subject & Message Template */}
+              <div className="space-y-3 pt-1">
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-slate-700">Email Subject Line</label>
+                    <span className="text-[10px] text-slate-400 font-mono">Tags: {"{{courseName}}"}</span>
+                  </div>
+                  <input 
+                    type="text" 
+                    value={emailSubject}
+                    onChange={(e) => { setEmailSubject(e.target.value); setEmailValidationError(''); }}
+                    className="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary font-medium"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-slate-700">Email Body Message</label>
+                    <span className="text-[10px] text-slate-400 font-mono">Tags: {"{{recipientName}}, {{courseName}}, {{date}}, {{issuerName}}"}</span>
+                  </div>
+                  <textarea 
+                    rows={4}
+                    value={emailBody}
+                    onChange={(e) => { setEmailBody(e.target.value); setEmailValidationError(''); }}
+                    className="w-full text-xs p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary font-sans leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              {/* Vector PDF Attachment Banner with Click-to-Preview Toggle */}
+              <div className="space-y-2">
+                <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-center justify-between text-xs text-blue-900">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <FileText className="w-4 h-4 text-blue-600" />
+                    <span>High-resolution Vector Certificate PDF (.pdf)</span>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setShowModalPreview(!showModalPreview)}
+                    className="px-2.5 py-1 text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center gap-1 cursor-pointer shadow-sm"
+                  >
+                    <Eye className="w-3 h-3" />
+                    <span>{showModalPreview ? 'Hide Preview' : 'Preview Certificate'}</span>
+                  </button>
+                </div>
+
+                {/* Collapsible Certificate Preview Drawer */}
+                {showModalPreview && (
+                  <div className="bg-slate-100/90 border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2 flex items-center justify-between w-full px-1">
+                      <span>Live PDF Certificate Attachment Preview</span>
+                      <span className="font-mono text-slate-400">{customizedTemplate.layout === 'landscape' ? '1120×800' : '800×1120'}</span>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-1 max-h-[220px] overflow-hidden flex items-center justify-center">
+                      <div className="transform scale-[0.22] origin-center shrink-0">
+                        <CertificateRenderer
+                          template={customizedTemplate}
+                          values={activeValues}
+                          scale={1}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* Modal Footer Bar */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+              <button 
+                type="button"
+                onClick={() => { setShowEmailModal(false); setEmailSuccess(false); setEmailValidationError(''); }}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button 
+                type="button"
+                onClick={handleBulkEmailDispatch}
+                disabled={emailIsSending}
+                className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {emailIsSending ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Sending Emails...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>Send PDF Certificates ({csvData.length > 0 ? csvData.length : 1})</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+          </div>
+        </div>
       )}
 
       {/* Footer */}

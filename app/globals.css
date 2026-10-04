@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --primary: #4169e1;
-  --primary-hover: #3154c9;
-  --card: #ffffff;
-  --border: #e2e8f0;
+  --background: #060b19;
+  --foreground: #f8fafc;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --card: #0c142d;
+  --border: #1e293b;
 }
 
 @theme inline {
@@ -21,19 +21,48 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Crisp Clean Panel Utilities */
+.pro-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.pro-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Print Media Layouts */
 @media print {
-  /* Hide all main web UI containers */
   body *, html *, #__next * {
     visibility: hidden !important;
   }
   
-  /* Only show print wrapper container */
   #print-wrapper, #print-wrapper * {
     visibility: visible !important;
   }
@@ -63,4 +92,5 @@ body {
     margin: 0;
   }
 }
+
 
