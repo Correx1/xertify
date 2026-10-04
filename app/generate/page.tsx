@@ -1547,6 +1547,22 @@ export default function UnifiedGeneratePage() {
                       <option value={2}>2 Logos</option>
                     </select>
                   </div>
+                  {/* Logo Size Dragger */}
+                  <div className="space-y-1 py-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[9px] font-bold text-slate-400 uppercase">Size: {logoSize}px</label>
+                      <button type="button" onClick={() => setLogoSize(110)} className="text-[8px] font-bold text-primary hover:underline">Reset</button>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="40" 
+                      max="240" 
+                      step="2"
+                      value={logoSize} 
+                      onChange={(e) => setLogoSize(parseInt(e.target.value))}
+                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" 
+                    />
+                  </div>
                   <div className="space-y-2">
                     <div className="space-y-1">
                       {logoCount === 2 && <span className="text-[8px] font-bold text-slate-400 uppercase block">Logo 1 (Left)</span>}
@@ -2144,7 +2160,7 @@ export default function UnifiedGeneratePage() {
       )}
 
       {/* Customization Studio Side Drawer */}
-      <div className={`fixed inset-y-0 right-0 w-full sm:max-w-lg md:max-w-xl bg-white border-l border-slate-200 shadow-2xl z-[150] transform transition-transform duration-300 flex flex-col print:hidden ${showStudio ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-y-0 right-0 w-full sm:w-[420px] md:w-[460px] bg-white border-l border-slate-200 shadow-2xl z-[150] transform transition-transform duration-300 flex flex-col print:hidden ${showStudio ? 'translate-x-0' : 'translate-x-full'}`}>
         {/* Drawer Header */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-2">
@@ -2218,8 +2234,84 @@ export default function UnifiedGeneratePage() {
           {/* Component Toggles */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
             <h2 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-1.5">
-              <Eye className="w-3.5 h-3.5 text-primary" /> 2. Components
+              <Eye className="w-3.5 h-3.5 text-primary" /> 2. Components &amp; Logo Size
             </h2>
+
+            {/* Organization Logo Configuration & Size Dragger */}
+            <div className="space-y-2.5 pb-2.5 border-b border-slate-100">
+              <div className="flex items-center justify-between">
+                <button type="button" onClick={() => setShowLogo(!showLogo)} className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                  {showLogo ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-slate-300" />}
+                  Organization Logo(s)
+                </button>
+                {showLogo && (
+                  <select value={logoCount} onChange={(e) => setLogoCount(parseInt(e.target.value))}
+                    className="text-[10px] p-1.5 border border-slate-200 rounded-lg bg-slate-50 cursor-pointer focus:outline-none font-semibold">
+                    <option value={1}>1 Logo</option>
+                    <option value={2}>2 Logos</option>
+                  </select>
+                )}
+              </div>
+
+              {showLogo && (
+                <div className="pl-6 space-y-2.5 pt-1">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                        Logo Size (Dragger): <span className="text-primary font-mono text-xs">{logoSize}px</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setLogoSize(110)}
+                        className="text-[9px] font-bold text-primary hover:underline cursor-pointer"
+                      >
+                        Reset (110px)
+                      </button>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="40" 
+                      max="240" 
+                      step="2"
+                      value={logoSize} 
+                      onChange={(e) => setLogoSize(parseInt(e.target.value))}
+                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" 
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2">
+                      <label className="px-2.5 py-1 border border-dashed border-slate-300 hover:bg-slate-50 rounded-lg cursor-pointer text-[10px] font-bold flex items-center gap-1 transition-colors text-slate-600">
+                        <Upload className="w-3 h-3 text-slate-400" />
+                        {customLogo ? 'Change Logo 1' : 'Upload Logo 1'}
+                        <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                      </label>
+                      {customLogo && (
+                        <button type="button" onClick={() => setCustomLogo('')} className="text-[8px] font-bold text-red-500 hover:underline">Remove</button>
+                      )}
+                    </div>
+                    {logoCount === 2 && (
+                      <div className="flex items-center gap-2">
+                        <label className="px-2.5 py-1 border border-dashed border-slate-300 hover:bg-slate-50 rounded-lg cursor-pointer text-[10px] font-bold flex items-center gap-1 transition-colors text-slate-600">
+                          <Upload className="w-3 h-3 text-slate-400" />
+                          {customLogo2 ? 'Change Logo 2' : 'Upload Logo 2'}
+                          <input type="file" accept="image/*" onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const base64 = await readFileAsDataURL(file);
+                              setCustomLogo2(base64);
+                            }
+                          }} className="hidden" />
+                        </label>
+                        {customLogo2 && (
+                          <button type="button" onClick={() => setCustomLogo2('')} className="text-[8px] font-bold text-red-500 hover:underline">Remove</button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Seal */}
             <div className="space-y-2 pb-2 border-b border-slate-100">
@@ -2398,10 +2490,10 @@ export default function UnifiedGeneratePage() {
         </div>
       </div>
 
-      {/* Drawer Backdrop */}
+      {/* Drawer Backdrop - Completely clear backdrop without blur so certificate is 100% visible in real time */}
       {showStudio && (
         <div 
-          className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[140] transition-opacity duration-300 print:hidden"
+          className="fixed inset-0 bg-black/5 z-[140] transition-opacity duration-300 print:hidden cursor-pointer"
           onClick={() => setShowStudio(false)}
         />
       )}
