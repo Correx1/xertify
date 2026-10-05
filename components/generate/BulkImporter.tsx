@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   ArrowLeft, FileSpreadsheet, Upload, Check, ChevronLeft, 
@@ -315,6 +316,7 @@ export const BulkImporter: React.FC<BulkImporterProps> = ({
                       }}
                     >
                       <QrCodeSvg
+                        value={(el as any).value || (el as any).src}
                         width={el.width}
                         height={el.height}
                       />
@@ -674,6 +676,7 @@ export const BulkImporter: React.FC<BulkImporterProps> = ({
                           viewBox="0 0 100 100"
                         >
                           <QrCodeSvg
+                            value={(el as any).value || (el as any).src}
                             width={100}
                             height={100}
                           />

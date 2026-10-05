@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { PREBUILT_TEMPLATES } from '@/lib/templates';
-import { CertificateTemplate, TextElement, ImageElement, BadgeElement, QrCodeElement } from '@/lib/types';
+import { CertificateTemplate, TextElement, ImageElement, BadgeElement, QrCodeElement, CanvasElement } from '@/lib/types';
 import { CertificateRenderer } from '@/components/templates/CertificateRenderer';
 import { svgToPngUrl, downloadFile, exportAsPDF, svgToPdfBlob } from '@/lib/export';
+import { generateVerificationDataUrl } from '@/lib/verification';
 import { parseCSV } from '@/lib/csv';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -30,8 +31,7 @@ import {
   Send,
   AlertCircle,
   CheckCircle,
-  RefreshCw,
-  Server
+  RefreshCw
 } from 'lucide-react';
 
 const SCRIPT_FONTS = ['Great Vibes', 'Alex Brush', 'Pinyon Script', 'Italianno', 'Playball', 'Parisienne', 'Tangerine', 'Sacramento', 'Allura'];
@@ -466,8 +466,26 @@ export default function UnifiedGeneratePage() {
     const width = isLandscape ? 1120 : 800;
     const height = isLandscape ? 800 : 1120;
 
+    const { url: verificationUrl } = generateVerificationDataUrl({
+      recipientName: formValues.recipientName,
+      courseName: formValues.courseName,
+      issuerName: formValues.issuerName,
+      issuerTitle: formValues.issuerTitle,
+      issuerName2: formValues.issuerName2,
+      issuerTitle2: formValues.issuerTitle2,
+      date: formValues.date,
+      templateId: activeTemplate.id,
+      bgColor,
+      borderColor,
+      accentColor,
+      borderStyle,
+      borderWidth,
+      badgeType,
+      showBadge,
+    });
+
     // Filter and customize elements
-    const customizedElements = activeTemplate.elements
+    const customizedElements: CanvasElement[] = activeTemplate.elements
       // Remove any existing logo or signature elements to handle them dynamically and consistently
       .filter(el => {
         const idLower = el.id.toLowerCase();
@@ -559,6 +577,7 @@ export default function UnifiedGeneratePage() {
         if (el.type === 'qrcode') {
           return {
             ...el,
+            value: verificationUrl,
             visible: showQrCode
           };
         }
@@ -840,6 +859,7 @@ export default function UnifiedGeneratePage() {
         y: qrY,
         width: 65,
         height: 65,
+        value: verificationUrl,
         visible: true,
       } as QrCodeElement);
     }
@@ -2686,7 +2706,7 @@ export default function UnifiedGeneratePage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-400 bg-white print:hidden mt-2">
-        <p>&copy; {new Date().getFullYear()} Xertified. Secure browser-sandbox rendering.</p>
+        <p>&copy; {new Date().getFullYear()} Xertified. Created by Chukwu Raphael</p>
       </footer>
 
     </div>

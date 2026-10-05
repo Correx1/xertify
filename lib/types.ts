@@ -44,6 +44,8 @@ export interface BadgeElement extends BaseElement {
 
 export interface QrCodeElement extends BaseElement {
   type: 'qrcode';
+  value?: string;
+  src?: string;
 }
 
 export type CanvasElement = TextElement | ImageElement | BadgeElement | QrCodeElement;

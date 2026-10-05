@@ -1,5 +1,5 @@
 import React from 'react';
-import { CertificateTemplate, TextElement, ImageElement, BadgeElement } from '@/lib/types';
+import { CertificateTemplate, TextElement, ImageElement, BadgeElement, QrCodeElement } from '@/lib/types';
 import { BadgeSvg } from './BadgeSvg';
 import { QrCodeSvg } from './QrCodeSvg';
 
@@ -493,6 +493,7 @@ export const CertificateRenderer: React.FC<CertificateRendererProps> = ({
 
           // 3. QR Code Elements
           if (el.type === 'qrcode') {
+            const qrEl = el as QrCodeElement;
             return (
               <svg
                 key={el.id}
@@ -503,6 +504,8 @@ export const CertificateRenderer: React.FC<CertificateRendererProps> = ({
                 viewBox="0 0 100 100"
               >
                 <QrCodeSvg
+                  value={qrEl.value || qrEl.src}
+                  color="#000000"
                   width={100}
                   height={100}
                 />
